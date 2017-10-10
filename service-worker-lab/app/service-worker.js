@@ -16,10 +16,19 @@ limitations under the License.
 (function() {
   'use strict';
 
-  // TODO - 3.1: Add install and activate event listeners
+  self.addEventListener('install', function(event) {
+    console.log('Service worker installing...');
+    self.skipWaiting();
+  });
 
-  // TODO - 3.3: Add a comment to change the service worker
+  self.addEventListener('activate', function(event) {
+    console.log('Service worker activating...');
+  });
 
-  // TODO - 4: Add fetch listener
+  // I'm a new service worker
+
+  self.addEventListener('fetch', function(event) {
+    console.log('Fetching:', event.request.url);
+  });
 
 })();
