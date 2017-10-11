@@ -18,6 +18,7 @@
 * The `skipWaiting()` method allows a service worker to activate as soon as it finishes installation. The install event listener is a common place to put the `skipWaiting()` call, but it can be called anywhere during or before the waiting phase. 
 * The default scope is the path to the service worker file, and extends to all lower directories. So a service worker in the root directory of an app controls requests from all files in the app.
 
+
 ## Working with Fetch API
 * The Fetch API is a simple interface for fetching resources.
 * Response Read methods: `arrayBuffer()`, `blob()`, `formData()`, `json()` and `text()`.
@@ -27,6 +28,7 @@
 * Using `mode: no-cors` allows fetching an opaque response. This prevents accessing the response with JavaScript (which is why we comment out validateResponse and readResponseAsText), but the response can still be consumed by other API's or cached by a service worker.
 * An _opaque_ filtered response is a filtered response whose type is "opaque", url list is the empty list, status is 0, status message is the empty byte sequence, header list is empty, body is null, and trailer is empty.
 * Like cross-origin requests, _custom headers_ must be supported by the server from which the resource is requested. Anytime a custom header is set, the browser performs a preflight check. This means that the browser first sends an OPTIONS request to the server, to determine what HTTP methods and headers are allowed by the server. If the server is configured to accept the method and headers of the original request, then it is sent, otherwise an error is thrown.
+
 
 ## Caching Files with Service Worker
 * To serve content from the cache and make your app available offline you need to intercept network requests and respond with files stored in the cache. There are several approaches to this:
@@ -78,4 +80,4 @@
     );
   });
   ```
-* More content...
+* Network response errors do not throw an error in the fetch promise. Instead, fetch returns the response object containing the error code of the network error. This means we handle network errors in a .then instead of a .catch. However, if the fetch cannot reach the network (user is offline) an error is thrown in the promise and the .catch executes.
