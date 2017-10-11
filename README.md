@@ -1,10 +1,6 @@
 # PWA Training Notes
 
 [Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet)
-```javascript
-var s = "JavaScript syntax highlighting";
-alert(s);
-```
 
 ## Intro to Service Workers
 * A proxy for network requests
@@ -26,8 +22,60 @@ alert(s);
 * The Fetch API is a simple interface for fetching resources.
 * Response Read methods: `arrayBuffer()`, `blob()`, `formData()`, `json()` and `text()`.
 * _HEAD_ requests are just like GET requests except the body of the response is empty. You can use this kind of request when all you want the file's metadata, and you want or need the file's data to be transported.
-* To make a _POST_ request with fetch, we use the `init` parameter to specify the method (similar to how we set the HEAD method in section 5). This is also where we set the `body` of the request. The body is the data we want to send.
+* To make a _POST_ request with fetch, we use the `init` parameter to specify the method. This is also where we set the `body` of the request. The body is the data we want to send.
 * The `FormData` constructor can take in an HTML `form`, and create a `FormData` object. This object is populated with the form's keys and values.
 * Using `mode: no-cors` allows fetching an opaque response. This prevents accessing the response with JavaScript (which is why we comment out validateResponse and readResponseAsText), but the response can still be consumed by other API's or cached by a service worker.
 * An _opaque_ filtered response is a filtered response whose type is "opaque", url list is the empty list, status is 0, status message is the empty byte sequence, header list is empty, body is null, and trailer is empty.
 * Like cross-origin requests, _custom headers_ must be supported by the server from which the resource is requested. Anytime a custom header is set, the browser performs a preflight check. This means that the browser first sends an OPTIONS request to the server, to determine what HTTP methods and headers are allowed by the server. If the server is configured to accept the method and headers of the original request, then it is sent, otherwise an error is thrown.
+
+## Caching Files with Service Worker
+* To serve content from the cache and make your app available offline you need to intercept network requests and respond with files stored in the cache. There are several approaches to this:
+
+  _Cache only_, This approach is good for any static assets that are part of your app's main code (part of that "version" of your app). You should have cached these in the install event, so you can depend on them being there.
+
+  _Network only_, This is the correct approach for things that can't be performed offline, such as analytics pings and non-GET requests.
+
+  _Cache falling back to Network_, If you're making your app offline-first, this is how you'll handle the majority of requests. This gives you the "Cache only" behavior for things in the cache and the "Network only" behaviour for anything not cached (which includes all non-GET requests, as they cannot be cached).
+
+  ```javascript
+  self.addEventListener('fetch', function(event) {
+    event.respondWith(
+      caches.match(event.request).then(function(response) {
+        return response || fetch(event.request);
+      })
+    );
+  });
+  ```
+  _Network falling back to Cache_, This is a good approach for resources that update frequently, and are not part of the "version" of the site (ie.: articles, game leader boards, etc). Handling network requests this way means the online users get the most up-to-date content, and offline users get an older cached version. However, this method has flaws. If the user has an intermittent or slow connection they'll have to wait for the network to fail before they get content from the cache.
+
+  ```javascript
+  self.addEventListener('fetch', function(event) {
+    event.respondWith(
+      fetch(event.request).catch(function() {
+        return caches.match(event.request);
+      })
+    );
+  });
+  ```
+  _Cache then Network_, This is also a good approach for resources that update frequently. This approach will get content on screen as fast as possible, but still display up-to-date content once it arrives.
+
+* Removing outdated caches, Once a new service worker has installed and a previous version isn't being used, the new one activates, and you get an activate event. Because the old version is out of the way, it's a good time to delete unused caches.
+
+  ```javascript
+  self.addEventListener('activate', function(event) {
+    event.waitUntil(
+      caches.keys().then(function(cacheNames) {
+        return Promise.all(
+          cacheNames.filter(function(cacheName) {
+            // Return true if you want to remove this cache,
+            // but remember that caches are shared across
+            // the whole origin
+          }).map(function(cacheName) {
+            return caches.delete(cacheName);
+          })
+        );
+      })
+    );
+  });
+  ```
+* More content...
