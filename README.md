@@ -81,3 +81,12 @@
   });
   ```
 * Network response errors do not throw an error in the fetch promise. Instead, fetch returns the response object containing the error code of the network error. This means we handle network errors in a .then instead of a .catch. However, if the fetch cannot reach the network (user is offline) an error is thrown in the promise and the .catch executes.
+
+
+## Lighthouse PWA Analysis Tool
+* Lighthouse is an open-source tool from Google that audits a web app for PWA features. It provides a set of metrics to help guide you in building a PWA with a full application-like experience for your users.
+* Lighthouse tests if your app:
+  * Can load in offline or flaky network conditions
+  * Is relatively fast
+  * Is served from a secure origin
+  * Uses certain accessibility best practices
