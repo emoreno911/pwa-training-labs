@@ -90,3 +90,32 @@
   * Is relatively fast
   * Is served from a secure origin
   * Uses certain accessibility best practices
+
+
+## Working with Promises
+* Promises provide a standardized way to manage asynchronous operations and handle errors. Think of a promise as an object that waits for an asynchronous action to finish, then calls a second function. You can schedule that second function by calling `.then()` and passing in the function. When the asynchronous function finishes, it gives its result to the promise and the promise gives that to the next function.
+
+```javascript
+var promise = new Promise(function(resolve, reject) {
+  // do a thing, possibly async, then...
+  if (/* everything turned out fine */) {
+    resolve("Stuff worked!");
+  }
+  else {
+    reject(Error("It broke"));
+  }
+});
+promise
+  .then(doSomething)
+  .then(doSomethingElse)
+  .catch(handleError)
+```
+
+* A promise is in one of these states:
+
+  _Pending_, The promise's outcome hasn't yet been determined, because the asynchronous operation that will produce its result hasn't completed yet.
+  _Fulfilled_, The operation resolved and the promise has a value.
+  _Rejected_, The operation failed and the promise will never be fulfilled. A failed promise has a reason indicating why it failed.
+
+* Promise rejections skip forward to the next then with a rejection callback (or catch, since they're equivalent). With `then(func1, func2)`, `func1` or `func2` will be called, never both. But with `then(func1).catch(func2)`, both will be called if `func1` rejects, as they're separate steps in the chain.
+* Promise.all, Promise.race.
